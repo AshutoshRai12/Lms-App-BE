@@ -19,7 +19,6 @@ const PORT = 5000 || process.env.PORT;
 
 app.use("/api/v1.0/lms", userRoutes);
 app.use("/api/v1.0/lms", courseRoutes);
-// app.use("/api/v1.0/lms", commentRoutes);
 
 app.get('',(req, res)=> {
     res.send("hello world");

@@ -2,11 +2,14 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel.js");
 const generateToken = require("../utils/generateToken.js");
 
+// @route   GET /api//login
+// @desc    This allow login and email and password.
+
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    res.status(401);
+    res.status(401).json({message:"User not Found"});
     throw new Error("User not found");
   } else if (user && (await user.matchPassword(password))) {
     res.json({
@@ -16,10 +19,13 @@ const authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401);
+    res.status(401).json({message:"Invalid Email or Password"});;
     throw new Error("Invalid Email or Password");
   }
 });
+
+// @route   GET /api/user/register
+// @desc    Add New User in application
 
 const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password } = req.body;
@@ -47,6 +53,9 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @route   GET /api/forgot
+// @desc    Used to reset Password
+
 const forgotPass =asyncHandler(async (req, res) => {
   try{
     const {email,password}= req.body;
@@ -55,7 +64,6 @@ const forgotPass =asyncHandler(async (req, res) => {
       {
       user.password = password;
       const updatedUser = await user.save();
-      console.log(updatedUser)
       res.status(200).json({message:"password updated successfully!!"})
       }
       else{
@@ -68,9 +76,12 @@ const forgotPass =asyncHandler(async (req, res) => {
   }
 })
 
+// @route   GET /api/user/:email
+// @desc    Get all User Details
+
 const getUser = asyncHandler(async (req, res) => {
   const users = await User.find({email:req.params.email});
-  if (users && users.legth > 0){
+  if (users && users.length > 0){
     res.status(200).json(users);
   } 
   else {
@@ -78,9 +89,22 @@ const getUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @route   GET /api/Users/List
+// @desc    Get all User List
+
+const getUserList = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+} catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+}
+});
 module.exports = {
   authUser,
   registerUser,
   forgotPass,
-  getUser
+  getUser,
+  getUserList
 };
